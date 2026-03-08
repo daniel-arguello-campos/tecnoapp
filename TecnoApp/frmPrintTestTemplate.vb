@@ -1,22 +1,20 @@
-﻿Imports System.IO
-Imports System.Diagnostics
-Imports System.ComponentModel
-Imports iText.Kernel.Pdf
-Imports iText.Kernel.Geom
-Imports iText.Kernel.Colors
-Imports iText.IO.Image
-Imports iText.Layout
-Imports iText.Layout.Element
-Imports iText.Layout.Properties
-Imports iText.Layout.Borders
+﻿Imports System.ComponentModel   ' Importa librerías necesarias para el programa
+Imports System.Diagnostics      ' Permite ejecutar procesos externos (abrir el PDF)
+Imports System.IO               ' Manejo de archivos y carpetas
+Imports iText.IO.Font.Constants ' Constantes de fuentes (ej. Helvetica)
+Imports iText.IO.Image          ' Para trabajar con imágenes
+Imports iText.Kernel.Colors     ' Para usar colores
+Imports iText.Kernel.Font       ' Para crear y usar fuentes
+Imports iText.Kernel.Geom       ' Para manejar tamaños de página
+Imports iText.Kernel.Pdf        ' Para crear documentos PDF
+Imports iText.Layout            ' Para diseñar el contenido del PDF
+Imports iText.Layout.Borders    ' Para manejar bordes de tablas y celdas
+Imports iText.Layout.Element    ' Para manejar elementos como párrafos, tablas, imágenes
+Imports iText.Layout.Properties ' Para propiedades de diseño (alineación, márgenes, etc.)
+
 Public Class frmPrintTestTemplate
 
-
     Public Sub CrearTestImpresionCompleto()
-
-        '====================================
-        ' INFORMACIÓN DEL CLIENTE Y EQUIPO
-        '====================================
 
         Dim cliente As String = "Daniela Vindas"
         Dim impresora As String = "Epson L4260"
@@ -24,200 +22,151 @@ Public Class frmPrintTestTemplate
         Dim fecha As String = Date.Now.ToShortDateString
         Dim hora As String = Date.Now.ToShortTimeString
 
-        '====================================
-        ' CREAR / VERIFICAR CARPETA PDF
-        '====================================
-
-        'Carpeta donde se guardarán los documentos generados
         Dim carpeta As String = Application.StartupPath & "\PDF\"
-
-        'Si la carpeta no existe se crea automáticamente
         If Not Directory.Exists(carpeta) Then
             Directory.CreateDirectory(carpeta)
         End If
 
-        'Ruta completa del archivo PDF
         Dim nombreArchivo As String = "Test_" & DateTime.Now.ToString("yyyyMMdd_HHmmss") & ".pdf"
         Dim ruta As String = carpeta & nombreArchivo
 
-        '====================================
-        ' CREACIÓN DEL DOCUMENTO PDF
-        '====================================
-
-        'Inicializa el escritor del PDF
-
         Dim writer As New PdfWriter(ruta)
-
-        'Crea el documento PDF
         Dim pdf As New PdfDocument(writer)
-
-        'Define el documento en tamaño carta
         Dim document As New Document(pdf, PageSize.LETTER)
+        document.SetMargins(5, 30, 30, 30)
 
-        'Define márgenes del documento
-        document.SetMargins(40, 40, 40, 40)
+        Dim converter As New ImageConverter()
+        Dim imgBytes() As Byte = CType(converter.ConvertTo(My.Resources.Banner, GetType(Byte())), Byte())
+        Dim imgData = ImageDataFactory.Create(imgBytes)
+        Dim imagen As New Image(imgData)
+        imagen.SetHorizontalAlignment(HorizontalAlignment.LEFT)
+        document.Add(imagen)
 
-        '====================================
-        ' TÍTULO DEL DOCUMENTO
-        '====================================
+        Dim fechaHora As DateTime = DateTime.Now
+        Dim cultura As New Globalization.CultureInfo("es-ES")
+        Dim textoFechaBase As String = fechaHora.ToString("dddd d 'de' MMMM 'de' yyyy, hh:mm tt", cultura)
+        Dim textoFecha As String = Char.ToUpper(textoFechaBase(0)) & textoFechaBase.Substring(1)
 
-        Dim titulo As New Paragraph("TEST DE IMPRESIÓN")
-        titulo.SetFontSize(18)
-        titulo.SetFontColor(ColorConstants.BLACK)
-        titulo.SetTextAlignment(TextAlignment.CENTER)
+        Dim fechaLabel As New Paragraph(textoFecha)
+        fechaLabel.SetFontSize(12)
+        fechaLabel.SetFontColor(ColorConstants.BLACK)
+        fechaLabel.SetTextAlignment(TextAlignment.RIGHT)
+        fechaLabel.SetMarginRight(15)
+        document.Add(fechaLabel)
 
-        document.Add(titulo)
-        document.Add(New Paragraph(" "))
+        Dim clientlabel As New Paragraph("Cliente: " + cliente)
+        clientlabel.SetFontSize(12).SetFontColor(ColorConstants.BLACK).SetTextAlignment(TextAlignment.LEFT).SetMarginLeft(15).SetMarginTop(0).SetMarginBottom(0)
+        document.Add(clientlabel)
 
-        '====================================
-        ' TABLA CON DATOS DEL CLIENTE
-        '====================================
+        Dim printernamelabel As New Paragraph("Modelo de impresora: " + impresora)
+        printernamelabel.SetFontSize(12).SetFontColor(ColorConstants.BLACK).SetTextAlignment(TextAlignment.LEFT).SetMarginLeft(15).SetMarginTop(0).SetMarginBottom(0)
+        document.Add(printernamelabel)
 
-        Dim tablaDatos As New Table(2)
-        tablaDatos.SetWidth(UnitValue.CreatePercentValue(60))
-        tablaDatos.SetHorizontalAlignment(HorizontalAlignment.CENTER)
-
-        tablaDatos.AddCell("Cliente:")
-        tablaDatos.AddCell(cliente)
-
-        tablaDatos.AddCell("Impresora:")
-        tablaDatos.AddCell(impresora)
-
-        tablaDatos.AddCell("Serie:")
-        tablaDatos.AddCell(serie)
-
-        tablaDatos.AddCell("Fecha:")
-        tablaDatos.AddCell(fecha)
-
-        tablaDatos.AddCell("Hora:")
-        tablaDatos.AddCell(hora)
-
-        document.Add(tablaDatos)
+        Dim printermodellabel As New Paragraph("Serie: " + serie)
+        printermodellabel.SetFontSize(12).SetFontColor(ColorConstants.BLACK).SetTextAlignment(TextAlignment.LEFT).SetMarginLeft(15).SetMarginTop(0).SetMarginBottom(0)
+        document.Add(printermodellabel)
 
         document.Add(New Paragraph(" "))
 
-        '====================================
-        ' BARRAS DE COLORES
-        'Sirven para verificar mezcla de tinta
-        '====================================
+        Dim TestCMYK As New Paragraph("Prueba CMYK")
+        Dim fontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
+        TestCMYK.SetFont(fontBold).SetTextAlignment(TextAlignment.CENTER)
+        document.Add(TestCMYK)
 
-        document.Add(New Paragraph("Barras de colores"))
+        Dim tablaColores As New Table(UnitValue.CreatePercentArray(New Single() {25, 25, 25, 25}))
+        tablaColores.SetWidth(UnitValue.CreatePercentValue(100)).SetHorizontalAlignment(HorizontalAlignment.CENTER)
 
-        Dim tablaColores As New Table(4)
-        tablaColores.SetWidth(UnitValue.CreatePercentValue(80))
-        tablaColores.SetHorizontalAlignment(HorizontalAlignment.CENTER)
-
-        Dim tamaño As Integer = 50
-
+        Dim tamaño As Integer = 25
         tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(ColorConstants.BLACK))
         tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(New DeviceRgb(0, 255, 255)))
         tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(New DeviceRgb(255, 0, 255)))
         tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(ColorConstants.YELLOW))
 
-        tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(ColorConstants.RED))
-        tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(ColorConstants.GREEN))
-        tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(ColorConstants.BLUE))
-        tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(ColorConstants.GRAY))
+        tablaColores.AddCell(New Cell().Add(New Paragraph("Negro").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
+        tablaColores.AddCell(New Cell().Add(New Paragraph("Cian").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
+        tablaColores.AddCell(New Cell().Add(New Paragraph("Magenta").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
+        tablaColores.AddCell(New Cell().Add(New Paragraph("Amarillo").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
 
         document.Add(tablaColores)
-
         document.Add(New Paragraph(" "))
 
-        '====================================
-        ' ESCALA DE GRISES
-        'Permite revisar degradado de tinta
-        '====================================
-
-        document.Add(New Paragraph("Escala de grises"))
-
-        Dim tablaGrises As New Table(10)
-        tablaGrises.SetWidth(UnitValue.CreatePercentValue(100))
-
-        For i As Integer = 0 To 9
-
-            Dim gris As Integer = 255 - (i * 25)
-
-            tablaGrises.AddCell(New Cell().
-                SetHeight(40).
-                SetBackgroundColor(New DeviceRgb(gris, gris, gris)))
-
+        Dim DegradadoNegro As New Table(UnitValue.CreatePercentArray(Enumerable.Repeat(100.0F / 9, 9).ToArray()))
+        DegradadoNegro.SetWidth(UnitValue.CreatePercentValue(100))
+        For i As Integer = 0 To 8
+            If i = 0 Then
+                DegradadoNegro.AddCell(New Cell().Add(New Paragraph("Negro").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetHeight(25).SetBackgroundColor(New DeviceRgb(255, 255, 255)).SetBorder(Border.NO_BORDER))
+            Else
+                Dim intensidad As Integer = (i - 1) * 32
+                DegradadoNegro.AddCell(New Cell().SetHeight(25).SetBackgroundColor(New DeviceRgb(intensidad, intensidad, intensidad)))
+            End If
         Next
+        document.Add(DegradadoNegro)
 
-        document.Add(tablaGrises)
+        Dim DegradadoCian As New Table(UnitValue.CreatePercentArray(Enumerable.Repeat(100.0F / 9, 9).ToArray()))
+        DegradadoCian.SetWidth(UnitValue.CreatePercentValue(100))
+        For i As Integer = 0 To 8
+            If i = 0 Then
+                DegradadoCian.AddCell(New Cell().Add(New Paragraph("Cian").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetHeight(25).SetBackgroundColor(New DeviceRgb(255, 255, 255)).SetBorder(Border.NO_BORDER))
+            Else
+                Dim intensidad As Integer = i * 32
+                DegradadoCian.AddCell(New Cell().SetHeight(25).SetBackgroundColor(New DeviceRgb(intensidad, 255, 255)))
+            End If
+        Next
+        document.Add(DegradadoCian)
 
-        document.Add(New Paragraph(" "))
+        Dim DegradadoMagenta As New Table(UnitValue.CreatePercentArray(Enumerable.Repeat(100.0F / 9, 9).ToArray()))
+        DegradadoMagenta.SetWidth(UnitValue.CreatePercentValue(100))
+        For i As Integer = 0 To 8
+            If i = 0 Then
+                DegradadoMagenta.AddCell(New Cell().Add(New Paragraph("Magenta").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetHeight(25).SetBackgroundColor(New DeviceRgb(255, 255, 255)).SetBorder(Border.NO_BORDER))
+            Else
+                Dim intensidad As Integer = i * 32
+                DegradadoMagenta.AddCell(New Cell().SetHeight(25).SetBackgroundColor(New DeviceRgb(255, intensidad, 255)))
+            End If
+        Next
+        document.Add(DegradadoMagenta)
 
-        '====================================
-        ' PRUEBA DE LÍNEAS FINAS
-        'Sirve para detectar inyectores tapados
-        '====================================
+        Dim DegradadoAmarillo As New Table(UnitValue.CreatePercentArray(Enumerable.Repeat(100.0F / 9, 9).ToArray()))
+        DegradadoAmarillo.SetWidth(UnitValue.CreatePercentValue(100))
+        For i As Integer = 0 To 8
+            If i = 0 Then
+                DegradadoAmarillo.AddCell(New Cell().Add(New Paragraph("Amarillo").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetHeight(25).SetBackgroundColor(New DeviceRgb(255, 255, 255)).SetBorder(Border.NO_BORDER))
+            Else
+                Dim intensidad As Integer = i * 32
+                DegradadoAmarillo.AddCell(New Cell().SetHeight(25).SetBackgroundColor(New DeviceRgb(255, 255, intensidad)))
+            End If
+        Next
+        document.Add(DegradadoAmarillo)
 
-        document.Add(New Paragraph("Prueba de líneas finas (inyectores)"))
+        Dim InyectorPattern As New Paragraph("Patrón de prueba de inyectores")
+        Dim InyectorPatternfontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
+        InyectorPattern.SetFont(InyectorPatternfontBold).SetTextAlignment(TextAlignment.CENTER)
+        document.Add(InyectorPattern)
 
-        'For i As Integer = 1 To 15
-        '    document.Add(New Paragraph("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"))
-        'Next
-
-        'document.Add(New Paragraph(" "))
-
-        '====================================
-        ' CUADROS DE DIAGNÓSTICO
-        'Sirven para observar manchas o fallos
-        '====================================
+        Dim InyectorTestConverter As New ImageConverter()
+        Dim InyectorTestimgBytes() As Byte = CType(converter.ConvertTo(My.Resources.InyectorTest, GetType(Byte())), Byte())
+        Dim InyectorTestimgData = ImageDataFactory.Create(InyectorTestimgBytes)
+        Dim InyectorTestimagen As New Image(InyectorTestimgData)
+        InyectorTestimagen.SetHorizontalAlignment(HorizontalAlignment.CENTER).SetWidth(200)
+        document.Add(InyectorTestimagen)
 
         document.Add(New Paragraph("Cuadros de diagnóstico"))
-
         Dim tablaDiag As New Table(6)
         tablaDiag.SetWidth(UnitValue.CreatePercentValue(90))
 
         For i As Integer = 1 To 12
-
             tablaDiag.AddCell(New Cell().
-                SetHeight(40).
-                SetBorder(New SolidBorder(1)))
-
+        SetHeight(40).
+        SetBorder(New SolidBorder(1)))
         Next
 
         document.Add(tablaDiag)
-
         document.Add(New Paragraph(" "))
-
-        '====================================
-        ' IMAGEN DE PRUEBA DE INYECTORES
-        'La imagen está almacenada en Resources/images
-        'pero en código se accede como My.Resources.InyectorTest
-        '====================================
 
         document.Add(New Paragraph("Patrón de prueba de inyectores").SetTextAlignment(TextAlignment.CENTER))
         document.Add(New Paragraph(" "))
 
-        'Convertir la imagen del Resource a bytes
-        Dim converter As New ImageConverter()
-        Dim imgBytes() As Byte = CType(converter.ConvertTo(My.Resources.InyectorTest, GetType(Byte())), Byte())
-
-        'Crear objeto de imagen para el PDF
-        Dim imgData = ImageDataFactory.Create(imgBytes)
-
-        Dim imagen As New Image(imgData)
-
-        'Centrar la imagen
-        imagen.SetHorizontalAlignment(HorizontalAlignment.CENTER)
-
-        'Ajustar tamaño para que encaje en la página
-        imagen.SetWidth(200)
-
-        'Agregar la imagen al documento
-        document.Add(imagen)
-
-        '====================================
-        ' CERRAR DOCUMENTO
-        '====================================
-
         document.Close()
-
-        '====================================
-        ' ABRIR EL PDF CON EL VISOR DEL SISTEMA
-        '====================================
 
         Process.Start(New ProcessStartInfo(ruta) With {.UseShellExecute = True})
 
