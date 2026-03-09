@@ -15,8 +15,11 @@ Imports iText.Layout.Properties ' Para propiedades de diseño (alineación, már
 Public Class frmPrintTestTemplate
 
     Public Sub CrearTestImpresionCompleto()
+        ' Crear fuentes para los titulos y el texto normal
+        Dim fontNormal = PdfFontFactory.CreateFont(StandardFonts.HELVETICA)
+        Dim fuenteNegrita = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
 
-        Dim cliente As String = "Daniela Vindas"
+        Dim cliente As String = "Daniel Arguello"
         Dim impresora As String = "Epson L4260"
         Dim serie As String = "XBRX204735"
         Dim fecha As String = Date.Now.ToShortDateString
@@ -54,17 +57,39 @@ Public Class frmPrintTestTemplate
         fechaLabel.SetMarginRight(15)
         document.Add(fechaLabel)
 
-        Dim clientlabel As New Paragraph("Cliente: " + cliente)
-        clientlabel.SetFontSize(12).SetFontColor(ColorConstants.BLACK).SetTextAlignment(TextAlignment.LEFT).SetMarginLeft(15).SetMarginTop(0).SetMarginBottom(0)
-        document.Add(clientlabel)
 
-        Dim printernamelabel As New Paragraph("Modelo de impresora: " + impresora)
-        printernamelabel.SetFontSize(12).SetFontColor(ColorConstants.BLACK).SetTextAlignment(TextAlignment.LEFT).SetMarginLeft(15).SetMarginTop(0).SetMarginBottom(0)
-        document.Add(printernamelabel)
 
-        Dim printermodellabel As New Paragraph("Serie: " + serie)
-        printermodellabel.SetFontSize(12).SetFontColor(ColorConstants.BLACK).SetTextAlignment(TextAlignment.LEFT).SetMarginLeft(15).SetMarginTop(0).SetMarginBottom(0)
-        document.Add(printermodellabel)
+        ' Crear párrafo con ambos textos
+        Dim p As New Paragraph()
+
+        p.Add(New Text("Cliente: ").SetFont(fuenteNegrita))
+        p.Add(New Text(cliente).SetFont(fontNormal))
+        p.Add(New Text(vbLf))
+        p.Add(New Text("Modelo: ").SetFont(fuenteNegrita))
+        p.Add(New Text(impresora).SetFont(fontNormal))
+        p.Add(New Text(vbLf))
+        p.Add(New Text("Serie: ").SetFont(fuenteNegrita))
+        p.Add(New Text(serie).SetFont(fontNormal))
+        p.SetTextAlignment(TextAlignment.LEFT)
+        p.SetMarginLeft(15)
+        p.SetMarginTop(0)
+        p.SetMarginBottom(0)
+
+        document.Add(p)
+
+
+
+        'Dim clientlabel As New Paragraph("Cliente: " + cliente)
+        'clientlabel.SetFontSize(12).SetFontColor(ColorConstants.BLACK).SetTextAlignment(TextAlignment.LEFT).SetMarginLeft(15).SetMarginTop(0).SetMarginBottom(0)
+        'document.Add(clientlabel)
+
+        'Dim printernamelabel As New Paragraph("Modelo de impresora: " + impresora)
+        'printernamelabel.SetFontSize(12).SetFontColor(ColorConstants.BLACK).SetTextAlignment(TextAlignment.LEFT).SetMarginLeft(15).SetMarginTop(0).SetMarginBottom(0)
+        'document.Add(printernamelabel)
+
+        'Dim printermodellabel As New Paragraph("Serie: " + serie)
+        'printermodellabel.SetFontSize(12).SetFontColor(ColorConstants.BLACK).SetTextAlignment(TextAlignment.LEFT).SetMarginLeft(15).SetMarginTop(0).SetMarginBottom(0)
+        'document.Add(printermodellabel)
 
         document.Add(New Paragraph(" "))
 
@@ -137,7 +162,8 @@ Public Class frmPrintTestTemplate
             End If
         Next
         document.Add(DegradadoAmarillo)
-
+        document.Add(New Paragraph(""))
+        document.Add(New Paragraph(" "))
         Dim InyectorPattern As New Paragraph("Patrón de prueba de inyectores")
         Dim InyectorPatternfontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
         InyectorPattern.SetFont(InyectorPatternfontBold).SetTextAlignment(TextAlignment.CENTER)
@@ -150,21 +176,24 @@ Public Class frmPrintTestTemplate
         InyectorTestimagen.SetHorizontalAlignment(HorizontalAlignment.CENTER).SetWidth(200)
         document.Add(InyectorTestimagen)
 
-        document.Add(New Paragraph("Cuadros de diagnóstico"))
-        Dim tablaDiag As New Table(6)
-        tablaDiag.SetWidth(UnitValue.CreatePercentValue(90))
-
-        For i As Integer = 1 To 12
-            tablaDiag.AddCell(New Cell().
-        SetHeight(40).
-        SetBorder(New SolidBorder(1)))
-        Next
-
-        document.Add(tablaDiag)
+        document.Add(New Paragraph(""))
         document.Add(New Paragraph(" "))
+        Dim TextTest As New Paragraph()
 
-        document.Add(New Paragraph("Patrón de prueba de inyectores").SetTextAlignment(TextAlignment.CENTER))
-        document.Add(New Paragraph(" "))
+        'Titulo Prueba de impresión de texto
+        TextTest.Add(New Text("Prueba de impresión de texto").SetFont(fuenteNegrita))
+        TextTest.SetTextAlignment(TextAlignment.CENTER)
+        document.Add(TextTest)
+
+        Dim texto As String = "Para mantener una impresora de inyección de tinta en buen estado es recomendable usarla con cierta regularidad y evitar largos periodos sin imprimir. Cuando pasa mucho tiempo sin uso, la tinta puede secarse en las mangueras y los inyectores, causando obstrucciones y mala calidad de impresión. Como buena práctica, se aconseja imprimir al menos una vez cada 7 a 10 días, utilizando todos los colores, para mantener el flujo de tinta activo y evitar que se solidifique en los conductos y cabezales." & vbLf
+
+        Dim pa As New Paragraph(texto)
+
+        pa.SetBorder(New SolidBorder(ColorConstants.BLACK, 1))
+        pa.SetMarginLeft(0)
+        pa.SetMarginRight(0)
+
+        document.Add(pa)
 
         document.Close()
 
