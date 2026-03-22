@@ -15,10 +15,23 @@ Imports iText.Layout.Properties ' Para propiedades de diseño (alineación, már
 Public Class frmPrintTestTemplate
 
     Public Sub CrearTestImpresionCompleto()
+        'Declaración de variables de tipo de fuente y párrafo
+        'Fuente negrita para títulos
+        Dim BoldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
+
+        'Fuente normal para texto
+        Dim NormalFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA)
+
+        'Declaración de cadena donde se almacenarán texto del PDF
+        Dim p As New Paragraph()
+        'p.Add(New Text("Cliente: ").SetFont(BoldFont))
+        'p.Add(New Text(cliente).SetFont(fontNormal))
+        'p.Add(New Text(vbLf))
         Dim Tittle As New Paragraph()
-        ' Crear fuentes para los titulos y el texto normal
-        Dim fontNormal = PdfFontFactory.CreateFont(StandardFonts.HELVETICA)
-        Dim fuenteNegrita = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
+
+
+
+
 
         Dim cliente As String = "CINDEA de Cóbano"
         Dim impresora As String = "Epson L1250"
@@ -26,57 +39,171 @@ Public Class frmPrintTestTemplate
         Dim fecha As String = Date.Now.ToShortDateString
         Dim hora As String = Date.Now.ToShortTimeString
 
+        ' Define la ruta de la carpeta "PDF" dentro del directorio donde se ejecuta la aplicación
         Dim carpeta As String = Application.StartupPath & "\PDF\"
+
+        ' Verifica si la carpeta NO existe
         If Not Directory.Exists(carpeta) Then
+            ' Si no existe, la crea automáticamente
             Directory.CreateDirectory(carpeta)
         End If
 
+        ' Genera un nombre único para el archivo PDF usando la fecha y hora actual
         Dim nombreArchivo As String = "Test_" & DateTime.Now.ToString("yyyyMMdd_HHmmss") & ".pdf"
+
+        ' Combina la ruta de la carpeta con el nombre del archivo para obtener la ruta completa
         Dim ruta As String = carpeta & nombreArchivo
 
+        ' Crea un escritor de PDF que guardará el archivo en la ruta especificada
         Dim writer As New PdfWriter(ruta)
+
+        ' Inicializa el documento PDF usando el escritor
         Dim pdf As New PdfDocument(writer)
+
+        ' Crea el documento con tamaño carta (LETTER)
         Dim document As New Document(pdf, PageSize.LETTER)
+
+        ' Establece los márgenes del documento (arriba, derecha, abajo, izquierda)
         document.SetMargins(5, 30, 30, 30)
 
+        ' Crea un convertidor para transformar la imagen en bytes
         Dim converter As New ImageConverter()
+
+        ' Convierte la imagen "Banner" de los recursos del proyecto a un arreglo de bytes
         Dim imgBytes() As Byte = CType(converter.ConvertTo(My.Resources.Banner, GetType(Byte())), Byte())
+
+        ' Crea un objeto de datos de imagen a partir del arreglo de bytes
         Dim imgData = ImageDataFactory.Create(imgBytes)
+
+        ' Crea un objeto imagen para insertarlo en el PDF
         Dim imagen As New Image(imgData)
+
+        ' Alinea la imagen a la izquierda dentro del documento
         imagen.SetHorizontalAlignment(HorizontalAlignment.LEFT)
+
+        ' Agrega la imagen al documento PDF
         document.Add(imagen)
 
-        Dim fechaHora As DateTime = DateTime.Now
+
+        ' ================================
+        ' FORMATO DE FECHA EN ESPAÑOL
+        ' ================================
+
         Dim cultura As New Globalization.CultureInfo("es-ES")
-        Dim textoFechaBase As String = fechaHora.ToString("dddd d 'de' MMMM 'de' yyyy, hh:mm tt", cultura)
-        Dim textoFecha As String = Char.ToUpper(textoFechaBase(0)) & textoFechaBase.Substring(1)
 
-        Dim fechaLabel As New Paragraph(textoFecha)
-        fechaLabel.SetFontSize(12)
-        fechaLabel.SetFontColor(ColorConstants.BLACK)
-        fechaLabel.SetTextAlignment(TextAlignment.RIGHT)
-        fechaLabel.SetMarginRight(15)
-        document.Add(fechaLabel)
+        Dim DateTimeTittle As DateTime = DateTime.Now
 
+        Dim textoFechatest As String = DateTimeTittle.ToString("dddd, d 'de' MMMM 'de' yyyy - hh:mm tt", cultura)
+
+        If Not String.IsNullOrEmpty(textoFechatest) Then
+            textoFechatest = Char.ToUpper(textoFechatest(0)) & textoFechatest.Substring(1)
+        End If
 
 
-        ' Crear párrafo con ambos textos
-        Dim p As New Paragraph()
+        ' ================================
+        ' CREACIÓN DE TABLA
+        ' ================================
 
-        p.Add(New Text("Cliente: ").SetFont(fuenteNegrita))
-        p.Add(New Text(cliente).SetFont(fontNormal))
-        p.Add(New Text(vbLf))
-        p.Add(New Text("Modelo: ").SetFont(fuenteNegrita))
-        p.Add(New Text(impresora).SetFont(fontNormal))
-        p.Add(New Text(vbLf))
-        p.Add(New Text("Serie: ").SetFont(fuenteNegrita))
-        p.Add(New Text(serie).SetFont(fontNormal))
-        p.SetTextAlignment(TextAlignment.LEFT)
-        p.SetMarginLeft(15)
-        p.SetMarginTop(0)
-        p.SetMarginBottom(0)
+        Dim tablaInfo As New Table(UnitValue.CreatePercentArray(New Single() {50, 50}))
+        tablaInfo.SetWidth(UnitValue.CreatePercentValue(100))
+        tablaInfo.SetHorizontalAlignment(HorizontalAlignment.CENTER)
 
-        document.Add(p)
+        ' 🔲 Borde externo de la tabla
+        tablaInfo.SetBorder(New SolidBorder(1))
+
+
+        ' ================================
+        ' FUNCIÓN PARA PÁRRAFOS LIMPIOS
+        ' ================================
+
+        Dim crearParrafo As Func(Of String, PdfFont, Single, Paragraph) =
+    Function(texto2, fuente, size)
+        Return New Paragraph(texto2).
+            SetFont(fuente).
+            SetFontSize(size).
+            SetTextAlignment(TextAlignment.LEFT).
+            SetMarginTop(0).
+            SetMarginBottom(0)
+    End Function
+
+        Dim sizeNormal As Single = 12
+        Dim sizeTitulo As Single = sizeNormal - 3
+
+
+        ' ================================
+        ' FILA 1
+        ' ================================
+
+        ' Columna 1 → Cliente
+        tablaInfo.AddCell(
+    New Cell().
+    Add(crearParrafo("Cliente:", BoldFont, sizeTitulo)). ' título normal
+    Add(crearParrafo(cliente, NormalFont, sizeNormal)). ' valor en negrita
+    SetBorder(Border.NO_BORDER).
+    SetPadding(2)
+)
+
+        ' 🔄 Columna 2 → (ANTES era Tipo de papel, AHORA es Fecha)
+        tablaInfo.AddCell(
+    New Cell().
+    Add(crearParrafo("Fecha de impresión:", NormalFont, sizeTitulo)).
+    Add(crearParrafo(textoFechatest, BoldFont, sizeNormal)).
+    SetBorder(Border.NO_BORDER).
+    SetPadding(2)
+)
+
+
+        ' ================================
+        ' FILA 2
+        ' ================================
+
+        ' Columna 1 → Modelo
+        tablaInfo.AddCell(
+    New Cell().
+    Add(crearParrafo("Modelo:", NormalFont, sizeTitulo)).
+    Add(crearParrafo(impresora, BoldFont, sizeNormal)).
+    SetBorder(Border.NO_BORDER).
+    SetPadding(2)
+)
+
+        ' 🔄 Columna 2 → (ANTES era Fecha, AHORA es Tipo de papel)
+        tablaInfo.AddCell(
+    New Cell().
+    Add(crearParrafo("Tipo de papel:", NormalFont, sizeTitulo)).
+    Add(crearParrafo("Normal", BoldFont, sizeNormal)).
+    SetBorder(Border.NO_BORDER).
+    SetPadding(2)
+)
+
+
+        ' ================================
+        ' FILA 3
+        ' ================================
+
+        ' Columna 1 → Serie
+        tablaInfo.AddCell(
+    New Cell().
+    Add(crearParrafo("Serie:", NormalFont, sizeTitulo)).
+    Add(crearParrafo(serie, BoldFont, sizeNormal)).
+    SetBorder(Border.NO_BORDER).
+    SetPadding(2)
+)
+
+        ' Columna 2 → Prueba #
+        tablaInfo.AddCell(
+    New Cell().
+    Add(crearParrafo("Prueba #:", NormalFont, sizeTitulo)).
+    Add(crearParrafo("1", BoldFont, sizeNormal)).
+    SetBorder(Border.NO_BORDER).
+    SetPadding(2)
+)
+
+
+        ' ================================
+        ' AGREGAR TABLA AL DOCUMENTO
+        ' ================================
+
+        document.Add(tablaInfo)
 
 
 
@@ -98,7 +225,7 @@ Public Class frmPrintTestTemplate
         'COMENTARIO
         'COMENTARIO
         Tittle = New Paragraph("")
-        Tittle.Add(New Text("Prueba de inyección CMYK").SetFont(fuenteNegrita))
+        Tittle.Add(New Text("Prueba de inyección CMYK").SetFont(BoldFont))
         Tittle.SetTextAlignment(TextAlignment.CENTER)
         document.Add(Tittle)
 
@@ -190,7 +317,7 @@ Public Class frmPrintTestTemplate
 
         'Titulo Prueba de impresión de texto
         Tittle = New Paragraph("")
-        Tittle.Add(New Text("Prueba de impresión de texto").SetFont(fuenteNegrita))
+        Tittle.Add(New Text("Prueba de impresión de texto").SetFont(BoldFont))
         Tittle.SetTextAlignment(TextAlignment.CENTER)
         document.Add(Tittle)
 
@@ -207,7 +334,7 @@ Public Class frmPrintTestTemplate
         document.Add(New Paragraph(" "))
         'COMENTARIO
         Tittle = New Paragraph("")
-        Tittle.Add(New Text("Prueba de imagen").SetFont(fuenteNegrita))
+        Tittle.Add(New Text("Prueba de imagen").SetFont(BoldFont))
         Tittle.SetTextAlignment(TextAlignment.CENTER)
         document.Add(Tittle)
 
@@ -220,8 +347,8 @@ Public Class frmPrintTestTemplate
         'COMENTARIO
         document.Add(New Paragraph(" "))
         p = New Paragraph("")
-        p.Add(New Text("Resultado de la prueba: ").SetFont(fuenteNegrita))
-        p.Add(New Text("( ) Atasco   ( ) Correcto").SetFont(fontNormal))
+        p.Add(New Text("Resultado de la prueba: ").SetFont(BoldFont))
+        p.Add(New Text("( ) Atasco   ( ) Correcto").SetFont(NormalFont))
         p.SetTextAlignment(TextAlignment.LEFT)
         p.SetMarginLeft(15)
         p.SetMarginTop(0)
@@ -237,4 +364,6 @@ Public Class frmPrintTestTemplate
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
         CrearTestImpresionCompleto()
     End Sub
+
+
 End Class
