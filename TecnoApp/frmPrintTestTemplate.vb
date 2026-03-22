@@ -15,13 +15,14 @@ Imports iText.Layout.Properties ' Para propiedades de diseño (alineación, már
 Public Class frmPrintTestTemplate
 
     Public Sub CrearTestImpresionCompleto()
+        Dim Tittle As New Paragraph()
         ' Crear fuentes para los titulos y el texto normal
         Dim fontNormal = PdfFontFactory.CreateFont(StandardFonts.HELVETICA)
         Dim fuenteNegrita = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
 
-        Dim cliente As String = "Daniel Arguello"
-        Dim impresora As String = "Epson L4260"
-        Dim serie As String = "XBRX204735"
+        Dim cliente As String = "CINDEA de Cóbano"
+        Dim impresora As String = "Epson L1250"
+        Dim serie As String = "XBFQ025529"
         Dim fecha As String = Date.Now.ToShortDateString
         Dim hora As String = Date.Now.ToShortTimeString
 
@@ -93,26 +94,33 @@ Public Class frmPrintTestTemplate
 
         document.Add(New Paragraph(" "))
 
-        Dim TestCMYK As New Paragraph("Prueba CMYK")
-        Dim fontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
-        TestCMYK.SetFont(fontBold).SetTextAlignment(TextAlignment.CENTER)
-        document.Add(TestCMYK)
+        Dim TestCMYK As New Paragraph("Prueba de inyección CMYK")
+        'COMENTARIO
+        'COMENTARIO
+        Tittle = New Paragraph("")
+        Tittle.Add(New Text("Prueba de inyección CMYK").SetFont(fuenteNegrita))
+        Tittle.SetTextAlignment(TextAlignment.CENTER)
+        document.Add(Tittle)
 
-        Dim tablaColores As New Table(UnitValue.CreatePercentArray(New Single() {25, 25, 25, 25}))
-        tablaColores.SetWidth(UnitValue.CreatePercentValue(100)).SetHorizontalAlignment(HorizontalAlignment.CENTER)
+        'Dim fontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
+        'TestCMYK.SetFont(fontBold).SetTextAlignment(TextAlignment.CENTER)
+        'document.Add(TestCMYK)
 
-        Dim tamaño As Integer = 25
-        tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(ColorConstants.BLACK))
-        tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(New DeviceRgb(0, 255, 255)))
-        tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(New DeviceRgb(255, 0, 255)))
-        tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(ColorConstants.YELLOW))
+        'Dim tablaColores As New Table(UnitValue.CreatePercentArray(New Single() {25, 25, 25, 25}))
+        'tablaColores.SetWidth(UnitValue.CreatePercentValue(100)).SetHorizontalAlignment(HorizontalAlignment.CENTER)
 
-        tablaColores.AddCell(New Cell().Add(New Paragraph("Negro").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
-        tablaColores.AddCell(New Cell().Add(New Paragraph("Cian").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
-        tablaColores.AddCell(New Cell().Add(New Paragraph("Magenta").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
-        tablaColores.AddCell(New Cell().Add(New Paragraph("Amarillo").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
+        'Dim tamaño As Integer = 25
+        'tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(ColorConstants.BLACK))
+        'tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(New DeviceRgb(0, 255, 255)))
+        'tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(New DeviceRgb(255, 0, 255)))
+        'tablaColores.AddCell(New Cell().SetHeight(tamaño).SetBackgroundColor(ColorConstants.YELLOW))
 
-        document.Add(tablaColores)
+        'tablaColores.AddCell(New Cell().Add(New Paragraph("Negro").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
+        'tablaColores.AddCell(New Cell().Add(New Paragraph("Cian").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
+        'tablaColores.AddCell(New Cell().Add(New Paragraph("Magenta").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
+        'tablaColores.AddCell(New Cell().Add(New Paragraph("Amarillo").SetTextAlignment(TextAlignment.CENTER)).SetVerticalAlignment(VerticalAlignment.MIDDLE).SetBorder(Border.NO_BORDER))
+
+        'document.Add(tablaColores)
         document.Add(New Paragraph(" "))
 
         Dim DegradadoNegro As New Table(UnitValue.CreatePercentArray(Enumerable.Repeat(100.0F / 9, 9).ToArray()))
@@ -178,12 +186,13 @@ Public Class frmPrintTestTemplate
 
         document.Add(New Paragraph(""))
         document.Add(New Paragraph(" "))
-        Dim TextTest As New Paragraph()
+
 
         'Titulo Prueba de impresión de texto
-        TextTest.Add(New Text("Prueba de impresión de texto").SetFont(fuenteNegrita))
-        TextTest.SetTextAlignment(TextAlignment.CENTER)
-        document.Add(TextTest)
+        Tittle = New Paragraph("")
+        Tittle.Add(New Text("Prueba de impresión de texto").SetFont(fuenteNegrita))
+        Tittle.SetTextAlignment(TextAlignment.CENTER)
+        document.Add(Tittle)
 
         Dim texto As String = "Para mantener una impresora de inyección de tinta en buen estado es recomendable usarla con cierta regularidad y evitar largos periodos sin imprimir. Cuando pasa mucho tiempo sin uso, la tinta puede secarse en las mangueras y los inyectores, causando obstrucciones y mala calidad de impresión. Como buena práctica, se aconseja imprimir al menos una vez cada 7 a 10 días, utilizando todos los colores, para mantener el flujo de tinta activo y evitar que se solidifique en los conductos y cabezales." & vbLf
 
@@ -195,6 +204,30 @@ Public Class frmPrintTestTemplate
 
         document.Add(pa)
 
+        document.Add(New Paragraph(" "))
+        'COMENTARIO
+        Tittle = New Paragraph("")
+        Tittle.Add(New Text("Prueba de imagen").SetFont(fuenteNegrita))
+        Tittle.SetTextAlignment(TextAlignment.CENTER)
+        document.Add(Tittle)
+
+        Dim ImageTestConverter As New ImageConverter()
+        Dim ImageTestConverterimgBytes() As Byte = CType(converter.ConvertTo(My.Resources.image_test, GetType(Byte())), Byte())
+        Dim ImageTestConverterimgData = ImageDataFactory.Create(ImageTestConverterimgBytes)
+        Dim ImageTestConverterimagen As New Image(ImageTestConverterimgData)
+        ImageTestConverterimagen.SetHorizontalAlignment(HorizontalAlignment.CENTER).SetWidth(550)
+        document.Add(ImageTestConverterimagen)
+        'COMENTARIO
+        document.Add(New Paragraph(" "))
+        p = New Paragraph("")
+        p.Add(New Text("Resultado de la prueba: ").SetFont(fuenteNegrita))
+        p.Add(New Text("( ) Atasco   ( ) Correcto").SetFont(fontNormal))
+        p.SetTextAlignment(TextAlignment.LEFT)
+        p.SetMarginLeft(15)
+        p.SetMarginTop(0)
+        p.SetMarginBottom(0)
+
+        document.Add(p)
         document.Close()
 
         Process.Start(New ProcessStartInfo(ruta) With {.UseShellExecute = True})
