@@ -146,8 +146,8 @@ Public Class frmPrintTestTemplate
         ' 🔄 Columna 2 → (ANTES era Tipo de papel, AHORA es Fecha)
         tablaInfo.AddCell(
     New Cell().
-    Add(crearParrafo("Fecha de impresión:", NormalFont, sizeTitulo)).
-    Add(crearParrafo(textoFechatest, BoldFont, sizeNormal)).
+    Add(crearParrafo("Prueba #:", NormalFont, sizeTitulo)).
+    Add(crearParrafo("1", BoldFont, sizeNormal)).
     SetBorder(Border.NO_BORDER).
     SetPadding(2)
 )
@@ -192,11 +192,12 @@ Public Class frmPrintTestTemplate
         ' Columna 2 → Prueba #
         tablaInfo.AddCell(
     New Cell().
-    Add(crearParrafo("Prueba #:", NormalFont, sizeTitulo)).
-    Add(crearParrafo("1", BoldFont, sizeNormal)).
+    Add(crearParrafo("Fecha de impresión:", NormalFont, sizeTitulo)).
+    Add(crearParrafo(textoFechatest, BoldFont, sizeNormal)).
     SetBorder(Border.NO_BORDER).
     SetPadding(2)
 )
+
 
 
         ' ================================
@@ -299,17 +300,118 @@ Public Class frmPrintTestTemplate
         document.Add(DegradadoAmarillo)
         document.Add(New Paragraph(""))
         document.Add(New Paragraph(" "))
-        Dim InyectorPattern As New Paragraph("Patrón de prueba de inyectores")
-        Dim InyectorPatternfontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
-        InyectorPattern.SetFont(InyectorPatternfontBold).SetTextAlignment(TextAlignment.CENTER)
-        document.Add(InyectorPattern)
+        'Dim InyectorPattern As New Paragraph("Patrón de prueba de inyectores")
+        'Dim InyectorPatternfontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
+        'InyectorPattern.SetFont(InyectorPatternfontBold).SetTextAlignment(TextAlignment.CENTER)
+        'document.Add(InyectorPattern)
 
-        Dim InyectorTestConverter As New ImageConverter()
-        Dim InyectorTestimgBytes() As Byte = CType(converter.ConvertTo(My.Resources.InyectorTest, GetType(Byte())), Byte())
-        Dim InyectorTestimgData = ImageDataFactory.Create(InyectorTestimgBytes)
-        Dim InyectorTestimagen As New Image(InyectorTestimgData)
-        InyectorTestimagen.SetHorizontalAlignment(HorizontalAlignment.CENTER).SetWidth(200)
-        document.Add(InyectorTestimagen)
+
+        ' ================================
+        ' CREAR TABLA 2 COLUMNAS (35% / 65%)
+        ' ================================
+        'Dim tablaImagenes As New Table(UnitValue.CreatePercentArray(New Single() {35, 65}))
+        'tablaImagenes.SetWidth(UnitValue.CreatePercentValue(100))
+
+
+        ' ================================
+        ' FUENTE PARA TÍTULOS
+        ' ================================
+        Dim fontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
+
+
+
+        ' ================================
+        ' CREAR TABLA 2 COLUMNAS (35% / 65%)
+        ' ================================
+        Dim tablaImagenes As New Table(UnitValue.CreatePercentArray(New Single() {40, 60}))
+        tablaImagenes.SetWidth(UnitValue.CreatePercentValue(100))
+
+
+        ' ================================
+        ' FUENTE PARA TÍTULOS
+        ' ================================
+        'Dim fontBold = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD)
+
+
+        ' ================================
+        ' FILA 1 → TÍTULOS
+        ' ================================
+
+        ' Columna 1 → Título
+        tablaImagenes.AddCell(
+    New Cell().
+    Add(New Paragraph("Patrón de prueba de inyectores").
+        SetFont(fontBold).
+        SetTextAlignment(TextAlignment.CENTER).
+        SetMarginTop(0).
+        SetMarginBottom(0)
+    ).
+    SetBorder(Border.NO_BORDER)
+)
+
+        ' Columna 2 → Título
+        tablaImagenes.AddCell(
+    New Cell().
+    Add(New Paragraph("Prueba de impresión de imagen").
+        SetFont(fontBold).
+        SetTextAlignment(TextAlignment.CENTER).
+        SetMarginTop(0).
+        SetMarginBottom(0)
+    ).
+    SetBorder(Border.NO_BORDER)
+)
+
+
+        ' ================================
+        ' CREAR IMAGEN (SE REUTILIZA)
+        ' ================================
+        Dim converter2 As New ImageConverter()
+        Dim imgBytes2() As Byte = CType(converter2.ConvertTo(My.Resources.InyectorTest, GetType(Byte())), Byte())
+        Dim imgData2 = ImageDataFactory.Create(imgBytes2)
+
+        Dim converter3 As New ImageConverter()
+        Dim imgBytes3() As Byte = CType(converter3.ConvertTo(My.Resources.image_test, GetType(Byte())), Byte())
+        Dim imgData3 = ImageDataFactory.Create(imgBytes3)
+
+        ' ================================
+        ' FILA 2 → IMÁGENES
+        ' ================================
+
+        ' Columna 1 → Imagen
+        tablaImagenes.AddCell(
+    New Cell().
+    Add(New Image(imgData2).
+        SetHorizontalAlignment(HorizontalAlignment.CENTER).
+        SetAutoScale(True) ' se adapta a la celda
+    ).
+    SetBorder(Border.NO_BORDER)
+)
+
+        ' Columna 2 → Imagen
+        tablaImagenes.AddCell(
+    New Cell().
+    Add(New Image(imgData3).
+        SetHorizontalAlignment(HorizontalAlignment.CENTER).
+        SetAutoScale(True)
+    ).
+    SetBorder(Border.NO_BORDER)
+)
+
+
+        ' ================================
+        ' AGREGAR TABLA AL DOCUMENTO
+        ' ================================
+        document.Add(tablaImagenes)
+
+
+
+
+        'Dim InyectorTestConverter As New ImageConverter()
+        'Dim InyectorTestimgBytes() As Byte = CType(converter.ConvertTo(My.Resources.InyectorTest, GetType(Byte())), Byte())
+        'Dim InyectorTestimgData = ImageDataFactory.Create(InyectorTestimgBytes)
+        'Dim InyectorTestimagen As New Image(InyectorTestimgData)
+        'InyectorTestimagen.SetHorizontalAlignment(HorizontalAlignment.CENTER).SetWidth(200)
+        'document.Add(InyectorTestimagen)
 
         document.Add(New Paragraph(""))
         document.Add(New Paragraph(" "))
@@ -325,7 +427,7 @@ Public Class frmPrintTestTemplate
 
         Dim pa As New Paragraph(texto)
 
-        pa.SetBorder(New SolidBorder(ColorConstants.BLACK, 1))
+        pa.SetBorder(Border.NO_BORDER)
         pa.SetMarginLeft(0)
         pa.SetMarginRight(0)
 
@@ -333,28 +435,62 @@ Public Class frmPrintTestTemplate
 
         document.Add(New Paragraph(" "))
         'COMENTARIO
-        Tittle = New Paragraph("")
-        Tittle.Add(New Text("Prueba de imagen").SetFont(BoldFont))
-        Tittle.SetTextAlignment(TextAlignment.CENTER)
-        document.Add(Tittle)
+        'Tittle = New Paragraph("")
+        'Tittle.Add(New Text("Prueba de imagen").SetFont(BoldFont))
+        'Tittle.SetTextAlignment(TextAlignment.CENTER)
+        'document.Add(Tittle)
 
-        Dim ImageTestConverter As New ImageConverter()
-        Dim ImageTestConverterimgBytes() As Byte = CType(converter.ConvertTo(My.Resources.image_test, GetType(Byte())), Byte())
-        Dim ImageTestConverterimgData = ImageDataFactory.Create(ImageTestConverterimgBytes)
-        Dim ImageTestConverterimagen As New Image(ImageTestConverterimgData)
-        ImageTestConverterimagen.SetHorizontalAlignment(HorizontalAlignment.CENTER).SetWidth(550)
-        document.Add(ImageTestConverterimagen)
+        'Dim ImageTestConverter As New ImageConverter()
+        'Dim ImageTestConverterimgBytes() As Byte = CType(converter.ConvertTo(My.Resources.image_test, GetType(Byte())), Byte())
+        'Dim ImageTestConverterimgData = ImageDataFactory.Create(ImageTestConverterimgBytes)
+        'Dim ImageTestConverterimagen As New Image(ImageTestConverterimgData)
+        'ImageTestConverterimagen.SetHorizontalAlignment(HorizontalAlignment.CENTER).SetWidth(450)
+        'document.Add(ImageTestConverterimagen)
         'COMENTARIO
         document.Add(New Paragraph(" "))
         p = New Paragraph("")
-        p.Add(New Text("Resultado de la prueba: ").SetFont(BoldFont))
-        p.Add(New Text("( ) Atasco   ( ) Correcto").SetFont(NormalFont))
+        p.Add(New Text("Resultado: ").SetFont(BoldFont))
+        p.Add(New Text("( ) CMYK   ( ) Inyección    ( ) Texto   ( ) Imagen").SetFont(NormalFont))
         p.SetTextAlignment(TextAlignment.LEFT)
         p.SetMarginLeft(15)
         p.SetMarginTop(0)
         p.SetMarginBottom(0)
 
         document.Add(p)
+
+        Dim pLeyenda As New Paragraph()
+
+        ' Cuadro verde
+        pLeyenda.Add(New Text("   ").
+    SetBackgroundColor(New DeviceRgb(0, 176, 80)))
+
+        pLeyenda.Add(New Text(" Correcto.   ").SetFont(NormalFont))
+
+        ' Cuadro rojo
+        pLeyenda.Add(New Text("   ").
+    SetBackgroundColor(New DeviceRgb(255, 0, 0)))
+
+        pLeyenda.Add(New Text(" Incorrecto.").SetFont(NormalFont))
+
+        pLeyenda.SetMarginTop(5)
+        pLeyenda.SetMarginBottom(5)
+
+        pLeyenda.Add(New Text("   ").
+    SetBackgroundColor(New DeviceRgb(0, 176, 80)))
+
+        pLeyenda.Add(New Text("   ").
+    SetBackgroundColor(New DeviceRgb(0, 176, 80)))
+
+        document.Add(pLeyenda)
+
+        pLeyenda.Add(New Text("● ").SetFontColor(New DeviceRgb(0, 176, 80)))
+        pLeyenda.Add(New Text("Correcto   "))
+
+        pLeyenda.Add(New Text("● ").SetFontColor(New DeviceRgb(255, 0, 0)))
+        pLeyenda.Add(New Text("Incorrecto"))
+
+        document.Add(pLeyenda)
+
         document.Close()
 
         Process.Start(New ProcessStartInfo(ruta) With {.UseShellExecute = True})
